@@ -1,0 +1,66 @@
+{
+  "name": "@rhythmjs/middleware",
+  "version": "0.0.1",
+  "description": "Standard Schema v1 validation middleware (body, query, and param) for Rhythm routers and handlers.",
+  "keywords": [
+    "middleware",
+    "rhythm",
+    "standard-schema",
+    "validation"
+  ],
+  "license": "ISC",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rhythmjs/middleware.git"
+  },
+  "files": [
+    "dist"
+  ],
+  "type": "module",
+  "sideEffects": false,
+  "exports": {
+    "./filter": {
+      "types": "./dist/filter/filter.d.ts",
+      "default": "./dist/filter/filter.js"
+    },
+    "./intercept": {
+      "types": "./dist/intercept/intercept.d.ts",
+      "default": "./dist/intercept/intercept.js"
+    },
+    "./validate": {
+      "types": "./dist/validate/validate.d.ts",
+      "default": "./dist/validate/validate.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "publishConfig": {
+    "access": "public"
+  },
+  "scripts": {
+    "build": "vp pack",
+    "prepublishOnly": "vp check && vp test && vp pack",
+    "typecheck": "tsc --noEmit",
+    "test": "vp test",
+    "lint": "vp lint",
+    "fmt": "vp fmt",
+    "fmt:check": "vp fmt --check",
+    "check": "vp check"
+  },
+  "dependencies": {
+    "@standard-schema/spec": "^1.0.0"
+  },
+  "devDependencies": {
+    "@types/node": "^26.6.3",
+    "typescript": "^7.0.2",
+    "vite-plus": "^1.0.0",
+    "zod": "^4.1.0"
+  },
+  "peerDependencies": {
+    "@rhythmjs/rhythm": "^0.0.1",
+    "@rhythmjs/router": "^0.0.1"
+  },
+  "engines": {
+    "node": ">=20.19.0"
+  },
+  "packageManager": "pnpm@10.33.2"
+}
