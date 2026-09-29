@@ -1,5 +1,5 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
-import type { Middleware } from "@rhythmjs/rhythm";
+import type { DeriveMiddleware, Middleware } from "@rhythmjs/rhythm/types";
 import type { RhythmRouterContext } from "@rhythmjs/router";
 import type { RhythmHttpContext } from "@rhythmjs/router/adapters/context";
 
@@ -48,10 +48,7 @@ function collectQuery(url: string): Record<string, string | string[]> {
 
 type ExtractResult = { ok: true; value: unknown } | { ok: false; message: string };
 
-async function extract(
-  ctx: Parameters<Middleware<ValidationContext>>[0],
-  target: ValidationTarget,
-): Promise<ExtractResult> {
+async function extract(ctx: ValidationContext, target: ValidationTarget): Promise<ExtractResult> {
   switch (target) {
     case "body":
       try {
@@ -69,8 +66,8 @@ async function extract(
 export function validate<TTarget extends ValidationTarget, TSchema extends StandardSchemaV1>(
   target: TTarget,
   schema: TSchema,
-): Middleware<ValidationContext> {
-  return async (ctx, next) => {
+): DeriveMiddleware<ValidationContext, Validated<TTarget, TSchema>> {
+  const middleware: Middleware<ValidationContext> = async (ctx, next) => {
     const fail = (issues: readonly ValidationIssue[]): void => {
       const failure: ValidationFailure = { success: false, target, issues };
       ctx.response.status = 400;
@@ -90,7 +87,8 @@ export function validate<TTarget extends ValidationTarget, TSchema extends Stand
       return;
     }
 
-    const valid = { ...ctx.valid, [target]: result.value };
-    await next({ valid } as Validated<TTarget, TSchema>);
+    ctx.valid = { ...ctx.valid, [target]: result.value };
+    await next();
   };
+  return middleware as DeriveMiddleware<ValidationContext, Validated<TTarget, TSchema>>;
 }

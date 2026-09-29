@@ -1,16 +1,20 @@
 import { describe, expect, test } from "vite-plus/test";
+import { Rhythm } from "@rhythmjs/rhythm";
 import { RhythmRouter } from "@rhythmjs/router";
 import { toFetchHandler } from "@rhythmjs/router/adapters/bun";
+import type { RhythmHttpContext } from "@rhythmjs/router/adapters/context";
 import { z } from "zod";
 import { intercept } from "../intercept/intercept";
 import { validate, type Validated } from "../validate/validate";
 import { filter, HttpError, type FilterFailure } from "./filter";
 
+const serve = (router: RhythmRouter) => toFetchHandler(new Rhythm<RhythmHttpContext>().use(router.routes()));
+
 const failureBody = (res: Response) => res.json() as Promise<FilterFailure>;
 
 describe("filter", () => {
   test("maps a thrown HttpError to its status and JSON body", async () => {
-    const app = toFetchHandler(
+    const app = serve(
       new RhythmRouter().use(filter()).get("/users/:id", () => {
         throw new HttpError(404, "user not found");
       }),
@@ -24,7 +28,7 @@ describe("filter", () => {
   });
 
   test("includes details when the HttpError carries them", async () => {
-    const app = toFetchHandler(
+    const app = serve(
       new RhythmRouter().use(filter()).post("/orders", () => {
         throw new HttpError(422, "cannot process order", { reason: "out of stock" });
       }),
@@ -42,7 +46,7 @@ describe("filter", () => {
   });
 
   test("maps an unknown Error to a generic 500 without leaking its message", async () => {
-    const app = toFetchHandler(
+    const app = serve(
       new RhythmRouter().use(filter()).get("/boom", () => {
         throw new Error("db password is hunter2");
       }),
@@ -57,7 +61,7 @@ describe("filter", () => {
   });
 
   test("maps a thrown non-Error value to a generic 500", async () => {
-    const app = toFetchHandler(new RhythmRouter().use(filter()).get("/boom", () => Promise.reject("boom")));
+    const app = serve(new RhythmRouter().use(filter()).get("/boom", () => Promise.reject("boom")));
 
     const res = await app(new Request("http://localhost/boom"));
 
@@ -66,7 +70,7 @@ describe("filter", () => {
   });
 
   test("catches errors thrown in downstream middleware, not just handlers", async () => {
-    const app = toFetchHandler(
+    const app = serve(
       new RhythmRouter().use(filter()).get(
         "/guarded",
         () => {
@@ -85,7 +89,7 @@ describe("filter", () => {
   });
 
   test("onError replaces the default mapping entirely", async () => {
-    const app = toFetchHandler(
+    const app = serve(
       new RhythmRouter()
         .use(
           filter((error, ctx) => {
@@ -105,7 +109,7 @@ describe("filter", () => {
   });
 
   test("leaves successful responses untouched across multiple routes", async () => {
-    const app = toFetchHandler(
+    const app = serve(
       new RhythmRouter()
         .use(filter())
         .get("/a", (ctx) => {
@@ -132,7 +136,7 @@ describe("filter", () => {
       .object({ first_name: z.string(), last_name: z.string() })
       .transform((u) => ({ fullName: `${u.first_name} ${u.last_name}` }));
 
-    const app = toFetchHandler(
+    const app = serve(
       new RhythmRouter()
         .use(filter())
         .post<Validated<"body", typeof CreateUser>>("/users", intercept(User), validate("body", CreateUser), (ctx) => {

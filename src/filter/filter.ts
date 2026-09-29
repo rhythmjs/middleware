@@ -1,4 +1,4 @@
-import type { Middleware } from "@rhythmjs/rhythm";
+import type { Middleware } from "@rhythmjs/rhythm/types";
 import type { RhythmHttpContext } from "@rhythmjs/router/adapters/context";
 
 export interface FilterFailure {
