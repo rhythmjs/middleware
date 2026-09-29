@@ -9,11 +9,11 @@ importers:
   .:
     dependencies:
       '@rhythmjs/rhythm':
-        specifier: ^0.0.4
-        version: 0.0.4
+        specifier: ^0.0.5
+        version: 0.0.5
       '@rhythmjs/router':
-        specifier: ^0.0.4
-        version: 0.0.4
+        specifier: ^0.0.5
+        version: 0.0.5
       '@standard-schema/spec':
         specifier: ^1.0.0
         version: 1.1.0
@@ -346,12 +346,12 @@ packages:
   '@polka/url@1.0.0-next.29':
     resolution: {integrity: sha512-wwQAWhWSuHaag8c4q/KN/vCoeOJYshAIvMQwD4GpSb3OiZklFfvAgmj0VCBBImRpuF/aFgIRzllXlVX93Jevww==}
 
-  '@rhythmjs/rhythm@0.0.4':
-    resolution: {integrity: sha512-wPtCXOomFy4hjrXbCF5MJQbGj1+Ad9lmwTXddTd4PKw9vAUNj+0DrM2+AOEayhzlgQHRtXkZ5eBMyJZaI/RRnQ==}
+  '@rhythmjs/rhythm@0.0.5':
+    resolution: {integrity: sha512-XeuZVLT/F1s/DHmWEf+AeVoVVOdYyCCHoj9/7Q1Itix59sPWQ9Oqz7CvT5fQErfhPhZHLlH+shSgDD1zb0adaA==}
     engines: {node: '>=20.19.0'}
 
-  '@rhythmjs/router@0.0.4':
-    resolution: {integrity: sha512-KZPTEma1u7ItMCcblFO7P9a3tE2BoonAeC/hy0WQH0MqUaEcOoZSFTnm9zV9mIDqi055r5mwhWKyyyDiGPhuOA==}
+  '@rhythmjs/router@0.0.5':
+    resolution: {integrity: sha512-/WgAr2LHDSRmW04rr7pCQC4knfVyjDH4c6XcNu/SmRhiGzlhyq2smAobIJyi09O8SRAdKFOV7NmLeTdQcScWYw==}
     engines: {node: '>=20.19.0'}
 
   '@standard-schema/spec@1.1.0':
@@ -1294,11 +1294,11 @@ snapshots:
 
   '@polka/url@1.0.0-next.29': {}
 
-  '@rhythmjs/rhythm@0.0.4': {}
+  '@rhythmjs/rhythm@0.0.5': {}
 
-  '@rhythmjs/router@0.0.4':
+  '@rhythmjs/router@0.0.5':
     dependencies:
-      '@rhythmjs/rhythm': 0.0.4
+      '@rhythmjs/rhythm': 0.0.5
 
   '@standard-schema/spec@1.1.0': {}
 
