@@ -1,13 +1,14 @@
 import { describe, expect, test } from "vite-plus/test";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { Rhythm } from "@rhythmjs/rhythm";
+import { compose } from "@rhythmjs/rhythm/compose";
 import { RhythmRouter } from "@rhythmjs/router";
 import { toFetchHandler } from "@rhythmjs/router/adapters/bun";
 import type { RhythmHttpContext } from "@rhythmjs/router/adapters/context";
 import { z } from "zod";
-import { validate, type Validated, type ValidationFailure } from "./validate";
+import { validate, type ValidationFailure } from "./validate";
 
-const serve = (router: RhythmRouter) => toFetchHandler(new Rhythm<RhythmHttpContext>().use(router.routes()));
+const serve = (router: RhythmRouter) => toFetchHandler(new Rhythm<RhythmHttpContext>().use(router.middleware()));
 
 const jsonRequest = (url: string, body: unknown) =>
   new Request(url, { method: "POST", body: JSON.stringify(body), headers: { "content-type": "application/json" } });
@@ -19,7 +20,7 @@ describe('validate("body", schema)', () => {
 
   const app = () =>
     serve(
-      new RhythmRouter().post<Validated<"body", typeof createUser>>("/users", validate("body", createUser), (ctx) => {
+      new RhythmRouter().post("/users", validate("body", createUser), (ctx) => {
         ctx.response.headers.set("content-type", "application/json");
         ctx.response.body = JSON.stringify(ctx.valid.body);
       }),
@@ -59,13 +60,9 @@ describe('validate("body", schema)', () => {
 
   test("leaves the request body readable for later handlers", async () => {
     const echo = serve(
-      new RhythmRouter().post<Validated<"body", typeof createUser>>(
-        "/users",
-        validate("body", createUser),
-        async (ctx) => {
-          ctx.response.body = JSON.stringify(await ctx.request.clone().json());
-        },
-      ),
+      new RhythmRouter().post("/users", validate("body", createUser), async (ctx) => {
+        ctx.response.body = JSON.stringify(await ctx.request.clone().json());
+      }),
     );
 
     const res = await echo(jsonRequest("http://localhost/users", { name: "Ada", age: 36 }));
@@ -75,7 +72,7 @@ describe('validate("body", schema)', () => {
   test("issue paths serialize nested and PathSegment-style keys", async () => {
     const nested = z.object({ author: z.object({ name: z.string() }) });
     const app = serve(
-      new RhythmRouter().post<Validated<"body", typeof nested>>("/books", validate("body", nested), (ctx) => {
+      new RhythmRouter().post("/books", validate("body", nested), (ctx) => {
         ctx.response.body = "ok";
       }),
     );
@@ -95,7 +92,7 @@ describe('validate("query", schema)', () => {
 
   const app = () =>
     serve(
-      new RhythmRouter().get<Validated<"query", typeof listQuery>>("/posts", validate("query", listQuery), (ctx) => {
+      new RhythmRouter().get("/posts", validate("query", listQuery), (ctx) => {
         ctx.response.body = JSON.stringify(ctx.valid.query);
       }),
     );
@@ -126,13 +123,9 @@ describe('validate("param", schema)', () => {
 
   const app = () =>
     serve(
-      new RhythmRouter().get<Validated<"param", typeof userParams>>(
-        "/users/:id",
-        validate("param", userParams),
-        (ctx) => {
-          ctx.response.body = JSON.stringify({ id: ctx.valid.param.id, type: typeof ctx.valid.param.id });
-        },
-      ),
+      new RhythmRouter().get("/users/:id", validate("param", userParams), (ctx) => {
+        ctx.response.body = JSON.stringify({ id: ctx.valid.param.id, type: typeof ctx.valid.param.id });
+      }),
     );
 
   test("validates and coerces route params matched by the router", async () => {
@@ -156,10 +149,9 @@ describe("validate (composition)", () => {
     const querySchema = z.object({ draft: z.coerce.boolean().default(false) });
 
     const app = serve(
-      new RhythmRouter().post<Validated<"body", typeof bodySchema> & Validated<"query", typeof querySchema>>(
+      new RhythmRouter().post(
         "/articles",
-        validate("body", bodySchema),
-        validate("query", querySchema),
+        compose([validate("body", bodySchema), validate("query", querySchema)]),
         (ctx) => {
           ctx.response.body = JSON.stringify({ ...ctx.valid.body, ...ctx.valid.query });
         },
@@ -182,7 +174,7 @@ describe("validate (composition)", () => {
     };
 
     const app = serve(
-      new RhythmRouter().post<Validated<"body", typeof uppercase>>("/shout", validate("body", uppercase), (ctx) => {
+      new RhythmRouter().post("/shout", validate("body", uppercase), (ctx) => {
         ctx.response.body = ctx.valid.body;
       }),
     );

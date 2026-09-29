@@ -24,7 +24,7 @@ function serializeIssues(issues: readonly StandardSchemaV1.Issue[]): InterceptIs
   });
 }
 
-export function intercept<TSchema extends StandardSchemaV1>(schema: TSchema): Middleware<RhythmHttpContext> {
+export function intercept(schema: StandardSchemaV1): Middleware<RhythmHttpContext> {
   return async (ctx, next) => {
     await next();
 
