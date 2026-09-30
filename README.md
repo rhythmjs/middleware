@@ -1,8 +1,8 @@
 # @rhythmjs/middleware
 
 Request validation, response interception, and exception filtering for
-[Rhythm](https://github.com/rhythmjs/rhythm), the Bun-native backend framework — the middleware that
-turns a router into a typed, schema-checked API. Each module is exported by its own subpath — there
+[Rhythm](https://github.com/rhythmjs/rhythm), the Bun-native backend framework: the middleware that
+turns a router into a typed, schema-checked API. Each module is exported by its own subpath; there
 is no root barrel export.
 
 ## Install
@@ -14,7 +14,7 @@ bun add @rhythmjs/middleware @rhythmjs/rhythm @rhythmjs/router
 ## `@rhythmjs/middleware/validate`
 
 A single `validate(target, schema)` middleware that validates a request part against any
-[Standard Schema v1](https://standardschema.dev) schema — zod, valibot, arktype, or your own.
+[Standard Schema v1](https://standardschema.dev) schema: zod, valibot, arktype, or your own.
 
 ```ts
 import { RhythmRouter } from "@rhythmjs/router";
@@ -36,9 +36,9 @@ const router = new RhythmRouter()
 
 ### `validate(target, schema)`
 
-- `target` — `"body"` (JSON request body), `"query"` (URL search params; repeated keys become arrays), or
+- `target`: `"body"` (JSON request body), `"query"` (URL search params; repeated keys become arrays), or
   `"param"` (route params matched by the router, e.g. `/users/:id`).
-- `schema` — any Standard Schema v1 schema; sync or async.
+- `schema`: any Standard Schema v1 schema; sync or async.
 
 On success the schema's **output** is merged into the context as `ctx.valid[target]`, so chained
 validators compose:
@@ -63,14 +63,14 @@ On failure the chain is short-circuited with a `400` JSON response of type `Vali
 
 ### Exported types
 
-- `Validated<Target, Schema>` — context-extension type for route handlers' `TExtra` parameter.
-- `ValidationTarget` — `"body" | "query" | "param"`.
-- `ValidationContext` — the context shape `validate` runs against.
-- `ValidationIssue` / `ValidationFailure` — the serialized issue and 400 response body shapes.
+- `Validated<Target, Schema>`: context-extension type for route handlers' `TExtra` parameter.
+- `ValidationTarget`: `"body" | "query" | "param"`.
+- `ValidationContext`: the context shape `validate` runs against.
+- `ValidationIssue` / `ValidationFailure`: the serialized issue and 400 response body shapes.
 
 ## `@rhythmjs/middleware/intercept`
 
-An `intercept(schema)` middleware that intercepts the outgoing response and transforms it through a schema —
+An `intercept(schema)` middleware that intercepts the outgoing response and transforms it through a schema:
 the response-side counterpart of `validate`. It takes a single argument: any Standard Schema v1 schema, so a
 zod `.transform()` works directly.
 
@@ -122,11 +122,11 @@ every error thrown by later middleware and handlers.
 
 - `throw new HttpError(status, message, details?)` anywhere downstream maps to that status with a JSON body
   of type `FilterFailure`: `{ "success": false, "status": 404, "message": "...", "details": ... }`.
-- Any other thrown value maps to a generic `500 { "success": false, "status": 500, "message": "Internal Server Error" }` —
+- Any other thrown value maps to a generic `500 { "success": false, "status": 500, "message": "Internal Server Error" }`;
   the original error message is never leaked to the client.
 - `filter(onError)` replaces the default mapping entirely: `onError(error, ctx)` can log, map domain errors
   to statuses, or rethrow.
-- Successful responses pass through untouched, and error responses are non-2xx so `intercept` skips them —
+- Successful responses pass through untouched, and error responses are non-2xx so `intercept` skips them;
   `filter`, `intercept`, and `validate` compose freely on one router.
 
 Exported types: `HttpError`, `FilterFailure`.
@@ -135,7 +135,7 @@ Exported types: `HttpError`, `FilterFailure`.
 
 ```sh
 bun install
-bun test           # bun test runner
-bun run typecheck  # tsc --noEmit
-bun run build      # bun build + tsc declarations
+bun test # bun test runner
+bun run typecheck # tsc --noEmit
+bun run build # bun build + tsc declarations
 ```
