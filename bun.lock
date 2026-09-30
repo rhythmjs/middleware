@@ -16,8 +16,8 @@
         "zod": "^4.1.0",
       },
       "peerDependencies": {
-        "@rhythmjs/rhythm": "^0.0.9",
-        "@rhythmjs/router": "^0.0.9",
+        "@rhythmjs/rhythm": "^0.0.11",
+        "@rhythmjs/router": "^0.0.11",
       },
     },
   },
@@ -60,9 +60,9 @@
 
     "@oxlint/binding-win32-x64-msvc": ["@oxlint/binding-win32-x64-msvc@1.86.0", "", { "os": "win32", "cpu": "x64" }, "sha512-az4dzifCRzES1crwu6pDFXzJTIanrdxXFL9TbiJWrx9LKcuacbR83aPvxDA1LKLNswi/RoqitC7Afcflhu3zBQ=="],
 
-    "@rhythmjs/rhythm": ["@rhythmjs/rhythm@0.0.9", "", {}, "sha512-cWAUIIfdj6rPekHvKF91G1OQVUv4jnW69FdVdwZlzSUDuf7ac5ZZUfJTeAg1k81mikMYCEclg+MXxmUEADyJMg=="],
+    "@rhythmjs/rhythm": ["@rhythmjs/rhythm@0.0.11", "", {}, "sha512-+e3eQSsh/3wRGiF9sqtO6rkSa75eH8aDumgfwr2mAWdxy7s/14ns8Fx9uIT8AzXWKYTUsqBY2ITkw4YS3sENDg=="],
 
-    "@rhythmjs/router": ["@rhythmjs/router@0.0.9", "", { "dependencies": { "@rhythmjs/rhythm": "0.0.9", "srvx": "^1.0.5" } }, "sha512-Ag0vs0HTeEHfH635Fh9WwrLfzY5/HFNyXRsa+lV7ODXfJuw5YNePVPO/ccMCTxTxKYkBIajQsGB6EQ/wg2luvQ=="],
+    "@rhythmjs/router": ["@rhythmjs/router@0.0.11", "", { "dependencies": { "@rhythmjs/rhythm": "0.0.11", "rou3": "^0.11.0" } }, "sha512-FyOgZJOBbOTWs4+b7xasz7Jfe3GqurzQ3diV2qjOv4phV8t68TwrkufJgVje75fcYUzVv3/AxhXikqF6w23JdA=="],
 
     "@standard-schema/spec": ["@standard-schema/spec@1.1.0", "", {}, "sha512-l2aFy5jALhniG5HgqrD6jXLi/rUWrKvqN/qJx6yoJsgKhblVd+iqqU4RCXavm/jPityDo5TCvKMnpjKnOriy0w=="],
 
@@ -116,7 +116,7 @@
 
     "prettier": ["prettier@3.9.9", "", { "bin": { "prettier": "bin/prettier.cjs" } }, "sha512-Z/CJHIkdujO/OtN7nXUii0Rf3VT5SRuhjBA82Xvu2XhBUgX3nhP67T0LHceBdQLex7OOFGTox+Q5Yg8Jk2Qivg=="],
 
-    "srvx": ["srvx@1.0.5", "", { "bin": { "srvx": "./bin/srvx.mjs" } }, "sha512-KvSKRpgPG/oaq3cyT614OQ2bAa7DynuGamivCZeoZzIUULOdbQz6wUtnnVuC4+DCx2Zglzo8v5gBYmWIWYhDxA=="],
+    "rou3": ["rou3@0.11.0", "", {}, "sha512-QYkFgNURTMBzmDpfFOpJNscLALbTlmFG/TGl4JVENesWNnrPAt7XHcml56Esb7fprnSRk4iwbgkmpZEPfX5MsA=="],
 
     "typescript": ["typescript@7.0.2", "", { "optionalDependencies": { "@typescript/typescript-aix-ppc64": "7.0.2", "@typescript/typescript-darwin-arm64": "7.0.2", "@typescript/typescript-darwin-x64": "7.0.2", "@typescript/typescript-freebsd-arm64": "7.0.2", "@typescript/typescript-freebsd-x64": "7.0.2", "@typescript/typescript-linux-arm": "7.0.2", "@typescript/typescript-linux-arm64": "7.0.2", "@typescript/typescript-linux-loong64": "7.0.2", "@typescript/typescript-linux-mips64el": "7.0.2", "@typescript/typescript-linux-ppc64": "7.0.2", "@typescript/typescript-linux-riscv64": "7.0.2", "@typescript/typescript-linux-s390x": "7.0.2", "@typescript/typescript-linux-x64": "7.0.2", "@typescript/typescript-netbsd-arm64": "7.0.2", "@typescript/typescript-netbsd-x64": "7.0.2", "@typescript/typescript-openbsd-arm64": "7.0.2", "@typescript/typescript-openbsd-x64": "7.0.2", "@typescript/typescript-sunos-x64": "7.0.2", "@typescript/typescript-win32-arm64": "7.0.2", "@typescript/typescript-win32-x64": "7.0.2" }, "bin": { "tsc": "bin/tsc" } }, "sha512-8FYau96o3NKOhbjKi/qNvG/W5jhzxkbdm5sj9AbZ/5T5sWqn3hJgLfGx27sRKZWTvyzCP8dLRBTf5tBTSRVUNA=="],
 
