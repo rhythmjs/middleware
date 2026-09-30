@@ -1,7 +1,9 @@
 # @rhythmjs/middleware
 
-Middleware collection for [Rhythm](https://github.com/rhythmjs/rhythm) routers and handlers. Each module is
-exported by its own subpath — there is no root barrel export.
+Request validation, response interception, and exception filtering for
+[Rhythm](https://github.com/rhythmjs/rhythm), the Bun-native backend framework — the middleware that
+turns a router into a typed, schema-checked API. Each module is exported by its own subpath — there
+is no root barrel export.
 
 ## Install
 
@@ -102,9 +104,8 @@ Exported types: `InterceptIssue`, `InterceptFailure`.
 
 ## `@rhythmjs/middleware/filter`
 
-An exception filter, inspired by [NestJS exception filters](https://docs.nestjs.com/exception-filters): a
-`filter(onError?)` middleware that catches anything thrown deeper in the chain and turns it into an HTTP
-response, paired with an `HttpError` class.
+An exception filter: a `filter(onError?)` middleware that catches anything thrown deeper in the chain and
+turns it into an HTTP response, paired with an `HttpError` class.
 
 ```ts
 import { RhythmRouter } from "@rhythmjs/router";
