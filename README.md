@@ -6,7 +6,7 @@ exported by its own subpath — there is no root barrel export.
 ## Install
 
 ```sh
-pnpm add @rhythmjs/middleware @rhythmjs/rhythm @rhythmjs/router
+bun add @rhythmjs/middleware @rhythmjs/rhythm @rhythmjs/router
 ```
 
 ## `@rhythmjs/middleware/validate`
@@ -133,8 +133,8 @@ Exported types: `HttpError`, `FilterFailure`.
 ## Development
 
 ```sh
-pnpm install
-pnpm test       # vp test
-pnpm typecheck  # tsc --noEmit
-pnpm build      # vp pack
+bun install
+bun test           # bun test runner
+bun run typecheck  # tsc --noEmit
+bun run build      # bun build + tsc declarations
 ```
