@@ -3,7 +3,7 @@ import type { StandardSchemaV1 } from "@standard-schema/spec";
 import { Rhythm } from "@rhythmjs/rhythm";
 import { compose } from "@rhythmjs/rhythm/compose";
 import { RhythmRouter } from "@rhythmjs/router";
-import { toFetchHandler } from "@rhythmjs/router/adapters/bun";
+import { toFetchHandler } from "@rhythmjs/router/fetch";
 import type { RhythmHttpContext } from "@rhythmjs/router/adapters/context";
 import { z } from "zod";
 import { validate } from "../validate/validate";
