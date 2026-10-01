@@ -36,14 +36,14 @@ function serializeIssues(issues: readonly StandardSchemaV1.Issue[]): ValidationI
 }
 
 function collectQuery(url: string): Record<string, string | string[]> {
-  const out: Record<string, string | string[]> = {};
+  const out = new Map<string, string | string[]>();
   for (const [key, value] of new URL(url).searchParams) {
-    const existing = out[key];
-    if (existing === undefined) out[key] = value;
+    const existing = out.get(key);
+    if (existing === undefined) out.set(key, value);
     else if (Array.isArray(existing)) existing.push(value);
-    else out[key] = [existing, value];
+    else out.set(key, [existing, value]);
   }
-  return out;
+  return Object.fromEntries(out);
 }
 
 type ExtractResult = { ok: true; value: unknown } | { ok: false; message: string };

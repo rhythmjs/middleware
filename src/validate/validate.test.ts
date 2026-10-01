@@ -110,6 +110,22 @@ describe('validate("query", schema)', () => {
     expect(await res.json()).toEqual({ page: 1, tag: ["a", "b"] });
   });
 
+  test("treats inherited object keys as ordinary query keys", async () => {
+    const permissive = serve(
+      new RhythmRouter().get("/echo", validate("query", z.record(z.string(), z.unknown())), (ctx) => {
+        ctx.response.body = JSON.stringify(ctx.valid.query);
+      }),
+    );
+
+    const res = await permissive(new Request("http://localhost/echo?constructor=x&toString=y&__proto__=z"));
+    const body = (await res.json()) as Record<string, unknown>;
+
+    expect(Object.getOwnPropertyDescriptor(body, "constructor")?.value).toBe("x");
+    expect(Object.getOwnPropertyDescriptor(body, "toString")?.value).toBe("y");
+    expect(Array.isArray(Object.getPrototypeOf(body))).toBe(false);
+    expect(({} as Record<string, unknown>).constructor).toBe(Object);
+  });
+
   test("rejects an invalid query with 400", async () => {
     const res = await app()(new Request("http://localhost/posts?page=0"));
 
