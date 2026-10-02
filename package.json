@@ -58,8 +58,8 @@
     "zod": "^4.1.0"
   },
   "peerDependencies": {
-    "@rhythmjs/rhythm": "^0.0.14",
-    "@rhythmjs/router": "^0.0.13"
+    "@rhythmjs/rhythm": ">=0.0.14",
+    "@rhythmjs/router": ">=0.0.13"
   },
   "engines": {
     "bun": ">=1.2.0"
