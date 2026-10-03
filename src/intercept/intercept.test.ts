@@ -21,14 +21,14 @@ describe("intercept", () => {
   test("intercepts the response and transforms it through the schema", async () => {
     const app = serve(
       new RhythmRouter().get("/users/ada", intercept(User), (ctx) => {
-        ctx.response.body = JSON.stringify({ first_name: "Ada", last_name: "Lovelace" });
+        ctx.json({ first_name: "Ada", last_name: "Lovelace" });
       }),
     );
 
     const res = await app(new Request("http://localhost/users/ada"));
 
     expect(res.status).toBe(200);
-    expect(res.headers.get("content-type")).toContain("application/json");
+    expect(res.headers.get("content-type")).toBe("application/json; charset=utf-8");
     expect(await res.json()).toEqual({ fullName: "Ada Lovelace" });
   });
 
@@ -36,7 +36,7 @@ describe("intercept", () => {
     const Public = z.object({ id: z.number(), name: z.string() });
     const app = serve(
       new RhythmRouter().get("/users/1", intercept(Public), (ctx) => {
-        ctx.response.body = JSON.stringify({ id: 1, name: "Ada", password: "s3cret" });
+        ctx.json({ id: 1, name: "Ada", password: "s3cret" });
       }),
     );
 
@@ -50,10 +50,10 @@ describe("intercept", () => {
       new RhythmRouter()
         .use(intercept(User))
         .get("/a", (ctx) => {
-          ctx.response.body = JSON.stringify({ first_name: "Ada", last_name: "Lovelace" });
+          ctx.json({ first_name: "Ada", last_name: "Lovelace" });
         })
         .get("/b", (ctx) => {
-          ctx.response.body = JSON.stringify({ first_name: "Grace", last_name: "Hopper" });
+          ctx.json({ first_name: "Grace", last_name: "Hopper" });
         }),
     );
 
@@ -64,7 +64,7 @@ describe("intercept", () => {
   test("responds 500 with issues when the response does not match the schema", async () => {
     const app = serve(
       new RhythmRouter().get("/users/bad", intercept(User), (ctx) => {
-        ctx.response.body = JSON.stringify({ first_name: "Ada" });
+        ctx.json({ first_name: "Ada" });
       }),
     );
 
@@ -79,8 +79,7 @@ describe("intercept", () => {
   test("leaves non-2xx responses untouched", async () => {
     const app = serve(
       new RhythmRouter().get("/missing", intercept(User), (ctx) => {
-        ctx.response.status = 404;
-        ctx.response.body = "not found";
+        ctx.text("not found", 404);
       }),
     );
 
@@ -108,7 +107,7 @@ describe("intercept", () => {
     const Upper = z.string().transform((s) => s.toUpperCase());
     const app = serve(
       new RhythmRouter().get("/greet", intercept(Upper), (ctx) => {
-        ctx.response.body = "hello";
+        ctx.text("hello");
       }),
     );
 
@@ -128,7 +127,7 @@ describe("intercept", () => {
 
     const app = serve(
       new RhythmRouter().get("/wrapped", intercept(wrap), (ctx) => {
-        ctx.response.body = JSON.stringify([1, 2, 3]);
+        ctx.json([1, 2, 3]);
       }),
     );
 
@@ -141,7 +140,7 @@ describe("intercept", () => {
     const CreateUser = z.object({ first_name: z.string(), last_name: z.string() });
     const app = serve(
       new RhythmRouter().post("/users", compose([intercept(User), validate("body", CreateUser)]), (ctx) => {
-        ctx.response.body = JSON.stringify(ctx.valid.body);
+        ctx.json(ctx.valid.body);
       }),
     );
 

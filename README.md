@@ -27,10 +27,10 @@ const userParams = z.object({ id: z.coerce.number().int().positive() });
 const router = new RhythmRouter()
   .post<Validated<"body", typeof createUser>>("/users", validate("body", createUser), (ctx) => {
     // ctx.valid.body is fully typed as the schema *output* ({ name: string; age: number })
-    ctx.response.body = JSON.stringify(ctx.valid.body);
+    ctx.json(ctx.valid.body);
   })
   .get<Validated<"param", typeof userParams>>("/users/:id", validate("param", userParams), (ctx) => {
-    ctx.response.body = `user #${ctx.valid.param.id}`;
+    ctx.text(`user #${ctx.valid.param.id}`);
   });
 ```
 
@@ -84,7 +84,7 @@ const User = z
   .transform((u) => ({ fullName: `${u.first_name} ${u.last_name}` }));
 
 const router = new RhythmRouter().get("/users/ada", intercept(User), (ctx) => {
-  ctx.response.body = JSON.stringify({ first_name: "Ada", last_name: "Lovelace" });
+  ctx.json({ first_name: "Ada", last_name: "Lovelace" });
 });
 // GET /users/ada => 200 {"fullName":"Ada Lovelace"}
 ```

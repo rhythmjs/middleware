@@ -24,7 +24,7 @@ describe("filter", () => {
     const res = await app(new Request("http://localhost/users/7"));
 
     expect(res.status).toBe(404);
-    expect(res.headers.get("content-type")).toContain("application/json");
+    expect(res.headers.get("content-type")).toBe("application/json; charset=utf-8");
     expect(await res.json()).toEqual({ success: false, status: 404, message: "user not found" });
   });
 
@@ -78,7 +78,7 @@ describe("filter", () => {
           throw new HttpError(401, "unauthorized");
         },
         (ctx) => {
-          ctx.response.body = "unreachable";
+          ctx.text("unreachable");
         },
       ),
     );
@@ -94,8 +94,7 @@ describe("filter", () => {
       new RhythmRouter()
         .use(
           filter((error, ctx) => {
-            ctx.response.status = 409;
-            ctx.response.body = error instanceof Error ? `conflict: ${error.message}` : "conflict";
+            ctx.text(error instanceof Error ? `conflict: ${error.message}` : "conflict", 409);
           }),
         )
         .get("/conflict", () => {
@@ -114,11 +113,10 @@ describe("filter", () => {
       new RhythmRouter()
         .use(filter())
         .get("/a", (ctx) => {
-          ctx.response.body = "a";
+          ctx.text("a");
         })
         .get("/b", (ctx) => {
-          ctx.response.status = 201;
-          ctx.response.body = "b";
+          ctx.text("b", 201);
         }),
     );
 
@@ -142,7 +140,7 @@ describe("filter", () => {
         .use(filter())
         .post("/users", compose([intercept(User), validate("body", CreateUser)]), (ctx) => {
           if (ctx.valid.body.first_name === "Grace") throw new HttpError(409, "user already exists");
-          ctx.response.body = JSON.stringify(ctx.valid.body);
+          ctx.json(ctx.valid.body);
         }),
     );
 

@@ -70,9 +70,7 @@ export function validate<TTarget extends ValidationTarget, TSchema extends Stand
   const middleware: Middleware<ValidationContext> = async (ctx, next) => {
     const fail = (issues: readonly ValidationIssue[]): void => {
       const failure: ValidationFailure = { success: false, target, issues };
-      ctx.response.status = 400;
-      ctx.response.headers.set("content-type", "application/json");
-      ctx.response.body = JSON.stringify(failure);
+      ctx.json(failure, 400);
     };
 
     const extracted = await extract(ctx, target);

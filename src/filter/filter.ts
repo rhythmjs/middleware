@@ -40,9 +40,7 @@ export function filter(
               ...(error.details === undefined ? {} : { details: error.details }),
             }
           : { success: false, status: 500, message: "Internal Server Error" };
-      ctx.response.status = failure.status;
-      ctx.response.headers.set("content-type", "application/json");
-      ctx.response.body = JSON.stringify(failure);
+      ctx.json(failure, failure.status);
     }
   };
 }

@@ -42,9 +42,7 @@ export function intercept(schema: StandardSchemaV1): Middleware<RhythmHttpContex
     const result = await schema["~standard"].validate(value);
     if (result.issues) {
       const failure: InterceptFailure = { success: false, issues: serializeIssues(result.issues) };
-      response.status = 500;
-      response.headers.set("content-type", "application/json");
-      response.body = JSON.stringify(failure);
+      ctx.json(failure, 500);
       return;
     }
 
@@ -52,7 +50,6 @@ export function intercept(schema: StandardSchemaV1): Middleware<RhythmHttpContex
       response.body = result.value;
       return;
     }
-    response.headers.set("content-type", "application/json");
-    response.body = JSON.stringify(result.value);
+    ctx.json(result.value);
   };
 }
