@@ -1,6 +1,6 @@
 {
   "name": "@rhythmjs/middleware",
-  "version": "0.0.8",
+  "version": "0.0.9",
   "description": "Standard Schema v1 validation middleware (body, query, and param) for Rhythm routers and handlers.",
   "keywords": [
     "middleware",
