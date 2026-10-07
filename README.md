@@ -11,27 +11,32 @@ is no root barrel export.
 bun add @rhythmjs/middleware @rhythmjs/rhythm @rhythmjs/router
 ```
 
+Requires `@rhythmjs/rhythm` and `@rhythmjs/router` 0.0.18 or newer. A `RhythmRouter` is a pipeline: mount it
+into a `Rhythm` app with `mount(router)` and serve the app with `toFetchHandler`.
+
 ## `@rhythmjs/middleware/validate`
 
-A single `validate(target, schema)` middleware that validates a request part against any
+A single `validate(target, schema)` route middleware that validates a request part against any
 [Standard Schema v1](https://standardschema.dev) schema: zod, valibot, arktype, or your own.
 
 ```ts
 import { RhythmRouter } from "@rhythmjs/router";
-import { validate, type Validated } from "@rhythmjs/middleware/validate";
+import { validate } from "@rhythmjs/middleware/validate";
 import { z } from "zod";
 
 const createUser = z.object({ name: z.string().min(1), age: z.coerce.number().int() });
 const userParams = z.object({ id: z.coerce.number().int().positive() });
 
 const router = new RhythmRouter()
-  .post<Validated<"body", typeof createUser>>("/users", validate("body", createUser), (ctx) => {
+  .post("/users", validate("body", createUser), (ctx) => {
     // ctx.valid.body is fully typed as the schema *output* ({ name: string; age: number })
     ctx.json(ctx.valid.body);
   })
-  .get<Validated<"param", typeof userParams>>("/users/:id", validate("param", userParams), (ctx) => {
+  .get("/users/:id", validate("param", userParams), (ctx) => {
     ctx.text(`user #${ctx.valid.param.id}`);
   });
+
+// mount it into an app: new Rhythm().use(mount(router))
 ```
 
 ### `validate(target, schema)`
@@ -40,19 +45,24 @@ const router = new RhythmRouter()
   `"param"` (route params matched by the router, e.g. `/users/:id`).
 - `schema`: any Standard Schema v1 schema; sync or async.
 
-On success the schema's **output** is merged into the context as `ctx.valid[target]`, so chained
-validators compose:
+On success the schema's **output** is merged into the context as `ctx.valid[target]`. `validate` is
+typed like `derive()`, so it must be the first handler of a route; it widens the context for the
+handlers after it. To chain several validators, `compose` them and declare the combined type:
 
 ```ts
-router.post<Validated<"body", typeof bodySchema> & Validated<"query", typeof querySchema>>(
-  "/articles",
-  validate("body", bodySchema),
-  validate("query", querySchema),
-  (ctx) => {
-    ctx.valid.body; // body output
-    ctx.valid.query; // query output
-  },
-);
+import { compose } from "@rhythmjs/rhythm/compose";
+import type { ExtensionMiddleware } from "@rhythmjs/rhythm/types";
+import { validate, type Validated, type ValidationContext } from "@rhythmjs/middleware/validate";
+
+const both = compose([validate("body", bodySchema), validate("query", querySchema)]) as ExtensionMiddleware<
+  ValidationContext,
+  Validated<"body", typeof bodySchema> & Validated<"query", typeof querySchema>
+>;
+
+router.post("/articles", both, (ctx) => {
+  ctx.valid.body; // body output
+  ctx.valid.query; // query output
+});
 ```
 
 On failure the chain is short-circuited with a `400` JSON response of type `ValidationFailure`:
@@ -63,7 +73,7 @@ On failure the chain is short-circuited with a `400` JSON response of type `Vali
 
 ### Exported types
 
-- `Validated<Target, Schema>`: context-extension type for route handlers' `TExtra` parameter.
+- `Validated<Target, Schema>`: the context extension `validate` adds (`{ valid: { [target]: output } }`).
 - `ValidationTarget`: `"body" | "query" | "param"`.
 - `ValidationContext`: the context shape `validate` runs against.
 - `ValidationIssue` / `ValidationFailure`: the serialized issue and 400 response body shapes.
@@ -83,13 +93,13 @@ const User = z
   .object({ first_name: z.string(), last_name: z.string() })
   .transform((u) => ({ fullName: `${u.first_name} ${u.last_name}` }));
 
-const router = new RhythmRouter().get("/users/ada", intercept(User), (ctx) => {
+const router = new RhythmRouter().use(intercept(User)).get("/users/ada", (ctx) => {
   ctx.json({ first_name: "Ada", last_name: "Lovelace" });
 });
 // GET /users/ada => 200 {"fullName":"Ada Lovelace"}
 ```
 
-Register it with `.use(intercept(schema))` to apply it to every route, or per route ahead of the handlers.
+Register it with `router.use(intercept(schema))`; it applies to the routes of that router.
 It runs after `next()` (onion order): the JSON response body is parsed, passed through the schema, and the
 schema's **output** is written back as the response. This also strips any fields the schema does not
 declare, so it doubles as a serialization guard (e.g. never leaking `password`).
@@ -111,13 +121,13 @@ turns it into an HTTP response, paired with an `HttpError` class.
 import { RhythmRouter } from "@rhythmjs/router";
 import { filter, HttpError } from "@rhythmjs/middleware/filter";
 
-const router = new RhythmRouter().use(filter()).get("/users/:id", (ctx) => {
+const router = new RhythmRouter().use(filter()).get("/users/:id", () => {
   throw new HttpError(404, "user not found");
 });
 // GET /users/1 => 404 {"success":false,"status":404,"message":"user not found"}
 ```
 
-Register it **first** (`.use(filter())` before any routes) so it forms the outermost onion layer and sees
+Register it **first** (`.use(filter())` before any other middleware) so it forms the outermost onion layer and sees
 every error thrown by later middleware and handlers.
 
 - `throw new HttpError(status, message, details?)` anywhere downstream maps to that status with a JSON body

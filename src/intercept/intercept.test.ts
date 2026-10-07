@@ -1,15 +1,13 @@
 import { describe, expect, test } from "bun:test";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
-import { Rhythm } from "@rhythmjs/rhythm";
-import { compose } from "@rhythmjs/rhythm/compose";
+import { Rhythm, mount } from "@rhythmjs/rhythm";
 import { RhythmRouter } from "@rhythmjs/router";
 import { toFetchHandler } from "@rhythmjs/router/fetch";
-import type { RhythmHttpContext } from "@rhythmjs/router/adapters/context";
 import { z } from "zod";
 import { validate } from "../validate/validate";
 import { intercept, type InterceptFailure } from "./intercept";
 
-const serve = (router: RhythmRouter) => toFetchHandler(new Rhythm<RhythmHttpContext>().use(router.middleware()));
+const serve = (router: RhythmRouter) => toFetchHandler(new Rhythm().use(mount(router)));
 
 const failureBody = (res: Response) => res.json() as Promise<InterceptFailure>;
 
@@ -139,7 +137,7 @@ describe("intercept", () => {
   test("composes with validate: request validated in, response transformed out", async () => {
     const CreateUser = z.object({ first_name: z.string(), last_name: z.string() });
     const app = serve(
-      new RhythmRouter().post("/users", compose([intercept(User), validate("body", CreateUser)]), (ctx) => {
+      new RhythmRouter().use(intercept(User)).post("/users", validate("body", CreateUser), (ctx) => {
         ctx.json(ctx.valid.body);
       }),
     );

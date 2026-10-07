@@ -1,15 +1,13 @@
 import { describe, expect, test } from "bun:test";
-import { Rhythm } from "@rhythmjs/rhythm";
-import { compose } from "@rhythmjs/rhythm/compose";
+import { Rhythm, mount } from "@rhythmjs/rhythm";
 import { RhythmRouter } from "@rhythmjs/router";
 import { toFetchHandler } from "@rhythmjs/router/fetch";
-import type { RhythmHttpContext } from "@rhythmjs/router/adapters/context";
 import { z } from "zod";
 import { intercept } from "../intercept/intercept";
 import { validate } from "../validate/validate";
 import { filter, HttpError, type FilterFailure } from "./filter";
 
-const serve = (router: RhythmRouter) => toFetchHandler(new Rhythm<RhythmHttpContext>().use(router.middleware()));
+const serve = (router: RhythmRouter) => toFetchHandler(new Rhythm().use(mount(router)));
 
 const failureBody = (res: Response) => res.json() as Promise<FilterFailure>;
 
@@ -138,7 +136,8 @@ describe("filter", () => {
     const app = serve(
       new RhythmRouter()
         .use(filter())
-        .post("/users", compose([intercept(User), validate("body", CreateUser)]), (ctx) => {
+        .use(intercept(User))
+        .post("/users", validate("body", CreateUser), (ctx) => {
           if (ctx.valid.body.first_name === "Grace") throw new HttpError(409, "user already exists");
           ctx.json(ctx.valid.body);
         }),

@@ -1,14 +1,14 @@
 import { describe, expect, test } from "bun:test";
 import type { StandardSchemaV1 } from "@standard-schema/spec";
-import { Rhythm } from "@rhythmjs/rhythm";
+import { Rhythm, mount } from "@rhythmjs/rhythm";
 import { compose } from "@rhythmjs/rhythm/compose";
 import { RhythmRouter } from "@rhythmjs/router";
 import { toFetchHandler } from "@rhythmjs/router/fetch";
-import type { RhythmHttpContext } from "@rhythmjs/router/adapters/context";
 import { z } from "zod";
-import { validate, type ValidationFailure } from "./validate";
+import type { ExtensionMiddleware } from "@rhythmjs/rhythm/types";
+import { validate, type Validated, type ValidationContext, type ValidationFailure } from "./validate";
 
-const serve = (router: RhythmRouter) => toFetchHandler(new Rhythm<RhythmHttpContext>().use(router.middleware()));
+const serve = (router: RhythmRouter) => toFetchHandler(new Rhythm().use(mount(router)));
 
 const jsonRequest = (url: string, body: unknown) =>
   new Request(url, { method: "POST", body: JSON.stringify(body), headers: { "content-type": "application/json" } });
@@ -166,7 +166,10 @@ describe("validate (composition)", () => {
     const app = serve(
       new RhythmRouter().post(
         "/articles",
-        compose([validate("body", bodySchema), validate("query", querySchema)]),
+        compose([validate("body", bodySchema), validate("query", querySchema)]) as ExtensionMiddleware<
+          ValidationContext,
+          Validated<"body", typeof bodySchema> & Validated<"query", typeof querySchema>
+        >,
         (ctx) => {
           ctx.json({ ...ctx.valid.body, ...ctx.valid.query });
         },
