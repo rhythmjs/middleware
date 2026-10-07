@@ -1,6 +1,6 @@
 {
   "name": "@rhythmjs/middleware",
-  "version": "0.0.9",
+  "version": "0.0.10",
   "description": "Standard Schema v1 validation middleware (body, query, and param) for Rhythm routers and handlers.",
   "keywords": [
     "middleware",
@@ -37,6 +37,8 @@
     "access": "public"
   },
   "scripts": {
+    "clean": "rm -rf dist",
+    "prebuild": "bun run clean",
     "build": "bun build src/filter/filter.ts src/intercept/intercept.ts src/validate/validate.ts --outdir dist --root src --format esm --target bun --packages external --splitting && tsc -p tsconfig.build.json",
     "prepublishOnly": "bun run check && bun test && bun run build",
     "typecheck": "tsc --noEmit",
