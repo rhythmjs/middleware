@@ -6,6 +6,7 @@ import { z } from "zod";
 import { intercept } from "../intercept/intercept";
 import { validate } from "../validate/validate";
 import { filter, HttpError, type FilterFailure } from "./filter";
+import { json, text } from "@rhythmjs/router/response";
 
 const serve = (router: RhythmRouter) => toFetchHandler(new Rhythm().use(mount(router)));
 
@@ -76,7 +77,7 @@ describe("filter", () => {
           throw new HttpError(401, "unauthorized");
         },
         (ctx) => {
-          ctx.text("unreachable");
+          text(ctx, "unreachable");
         },
       ),
     );
@@ -92,7 +93,7 @@ describe("filter", () => {
       new RhythmRouter()
         .use(
           filter((error, ctx) => {
-            ctx.text(error instanceof Error ? `conflict: ${error.message}` : "conflict", 409);
+            text(ctx, error instanceof Error ? `conflict: ${error.message}` : "conflict", 409);
           }),
         )
         .get("/conflict", () => {
@@ -111,10 +112,10 @@ describe("filter", () => {
       new RhythmRouter()
         .use(filter())
         .get("/a", (ctx) => {
-          ctx.text("a");
+          text(ctx, "a");
         })
         .get("/b", (ctx) => {
-          ctx.text("b", 201);
+          text(ctx, "b", 201);
         }),
     );
 
@@ -139,7 +140,7 @@ describe("filter", () => {
         .use(intercept(User))
         .post("/users", validate("body", CreateUser), (ctx) => {
           if (ctx.valid.body.first_name === "Grace") throw new HttpError(409, "user already exists");
-          ctx.json(ctx.valid.body);
+          json(ctx, ctx.valid.body);
         }),
     );
 

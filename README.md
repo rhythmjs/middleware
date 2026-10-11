@@ -18,8 +18,8 @@ Each one is exported from its own subpath; there is no root barrel export.
 bun add @rhythmjs/middleware @rhythmjs/rhythm @rhythmjs/router
 ```
 
-`@rhythmjs/rhythm` and `@rhythmjs/router` are peer dependencies (0.0.18 or newer; the examples below
-are written against 0.0.20), and Bun 1.2 or newer is required. The package depends on
+`@rhythmjs/rhythm` and `@rhythmjs/router` are peer dependencies (0.0.24 or newer; the examples below
+are written against 0.0.24), and Bun 1.2 or newer is required. The package depends on
 `@standard-schema/spec` for types only. It does not ship a schema library: install whichever
 Standard Schema library you prefer, for example `bun add zod` (the examples use zod 4).
 
@@ -36,6 +36,7 @@ import { filter, HttpError } from "@rhythmjs/middleware/filter";
 import { intercept } from "@rhythmjs/middleware/intercept";
 import { validate } from "@rhythmjs/middleware/validate";
 import { z } from "zod";
+import { json } from "@rhythmjs/router/response";
 
 const createUser = z.object({ name: z.string().min(1), age: z.coerce.number().int() });
 const userParams = z.object({ id: z.coerce.number().int().positive() });
@@ -50,11 +51,11 @@ const usersRouter = new RhythmRouter()
   .use(intercept(publicUser)) // shapes every successful response of this router
   .post("/users", validate("body", createUser), (ctx) => {
     // ctx.valid.body is typed as the schema output: { name: string; age: number }
-    ctx.json({ id: 1, ...ctx.valid.body, passwordHash: "secret" }, 201);
+    json(ctx, { id: 1, ...ctx.valid.body, passwordHash: "secret" }, 201);
   })
   .get("/users/:id", validate("param", userParams), (ctx) => {
     if (ctx.valid.param.id !== 1) throw new HttpError(404, "user not found");
-    ctx.json({ id: 1, name: "Ada", age: 36, passwordHash: "secret" });
+    json(ctx, { id: 1, name: "Ada", age: 36, passwordHash: "secret" });
   });
 
 const app = new Rhythm().use(mount(usersRouter));
@@ -67,7 +68,7 @@ What happens on each request:
 1. `filter` wraps the rest of the router's chain in a `try`/`catch`.
 2. `validate` parses the request, runs the schema, and either responds `400` or stores the result on
    `ctx.valid` and continues.
-3. Your handler runs and writes the response with `ctx.json(...)`, `ctx.text(...)`, and so on.
+3. Your handler runs and writes the response with `json(ctx, ...)`, `text(ctx, ...)`, and so on.
 4. On the way back out, `intercept` parses the JSON response, passes it through its schema, and writes
    the schema output back. `POST /users` answers `201 {"id":1,"name":"Ada","age":36}`.
 5. Anything thrown in steps 2 to 4 reaches `filter`, which answers with a JSON error.
@@ -181,7 +182,7 @@ const User = z
   .transform((u) => ({ fullName: `${u.first_name} ${u.last_name}` }));
 
 const router = new RhythmRouter().use(intercept(User)).get("/users/ada", (ctx) => {
-  ctx.json({ first_name: "Ada", last_name: "Lovelace" });
+  json(ctx, { first_name: "Ada", last_name: "Lovelace" });
 });
 // GET /users/ada => 200 {"fullName":"Ada Lovelace"}
 ```
@@ -219,7 +220,7 @@ const router = new RhythmRouter().use(filter()).get("/users/:id", () => {
   `500 { "success": false, "status": 500, "message": "Internal Server Error" }`. The original message is never
   sent to the client, and the default mapping does not log it.
 - `filter(onError)` replaces the default mapping entirely. `onError(error, ctx)` may be async and is
-  responsible for writing the response (`ctx.json(...)`, `ctx.text(...)`) and for any logging; if it does
+  responsible for writing the response (`json(ctx, ...)`, `text(ctx, ...)`) and for any logging; if it does
   not respond, nothing has been written and `toFetchHandler` answers `404`. It can also rethrow.
 
 ```ts
@@ -227,11 +228,11 @@ const router = new RhythmRouter()
   .use(
     filter((error, ctx) => {
       if (error instanceof HttpError) {
-        ctx.json({ error: error.message }, error.status);
+        json(ctx, { error: error.message }, error.status);
         return;
       }
       console.error(error);
-      ctx.json({ error: "Internal Server Error" }, 500);
+      json(ctx, { error: "Internal Server Error" }, 500);
     }),
   )
   .get("/boom", () => {

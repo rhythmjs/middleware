@@ -7,6 +7,7 @@ import { toFetchHandler } from "@rhythmjs/router/fetch";
 import { z } from "zod";
 import type { ExtensionMiddleware } from "@rhythmjs/rhythm/types";
 import { validate, type Validated, type ValidationContext, type ValidationFailure } from "./validate";
+import { json, text } from "@rhythmjs/router/response";
 
 const serve = (router: RhythmRouter) => toFetchHandler(new Rhythm().use(mount(router)));
 
@@ -21,7 +22,7 @@ describe('validate("body", schema)', () => {
   const app = () =>
     serve(
       new RhythmRouter().post("/users", validate("body", createUser), (ctx) => {
-        ctx.json(ctx.valid.body);
+        json(ctx, ctx.valid.body);
       }),
     );
 
@@ -60,7 +61,7 @@ describe('validate("body", schema)', () => {
   test("leaves the request body readable for later handlers", async () => {
     const echo = serve(
       new RhythmRouter().post("/users", validate("body", createUser), async (ctx) => {
-        ctx.json(await ctx.request.clone().json());
+        json(ctx, await ctx.request.clone().json());
       }),
     );
 
@@ -72,7 +73,7 @@ describe('validate("body", schema)', () => {
     const nested = z.object({ author: z.object({ name: z.string() }) });
     const app = serve(
       new RhythmRouter().post("/books", validate("body", nested), (ctx) => {
-        ctx.text("ok");
+        text(ctx, "ok");
       }),
     );
 
@@ -92,7 +93,7 @@ describe('validate("query", schema)', () => {
   const app = () =>
     serve(
       new RhythmRouter().get("/posts", validate("query", listQuery), (ctx) => {
-        ctx.json(ctx.valid.query);
+        json(ctx, ctx.valid.query);
       }),
     );
 
@@ -112,7 +113,7 @@ describe('validate("query", schema)', () => {
   test("treats inherited object keys as ordinary query keys", async () => {
     const permissive = serve(
       new RhythmRouter().get("/echo", validate("query", z.record(z.string(), z.unknown())), (ctx) => {
-        ctx.json(ctx.valid.query);
+        json(ctx, ctx.valid.query);
       }),
     );
 
@@ -139,7 +140,7 @@ describe('validate("param", schema)', () => {
   const app = () =>
     serve(
       new RhythmRouter().get("/users/:id", validate("param", userParams), (ctx) => {
-        ctx.json({ id: ctx.valid.param.id, type: typeof ctx.valid.param.id });
+        json(ctx, { id: ctx.valid.param.id, type: typeof ctx.valid.param.id });
       }),
     );
 
@@ -171,7 +172,7 @@ describe("validate (composition)", () => {
           Validated<"body", typeof bodySchema> & Validated<"query", typeof querySchema>
         >,
         (ctx) => {
-          ctx.json({ ...ctx.valid.body, ...ctx.valid.query });
+          json(ctx, { ...ctx.valid.body, ...ctx.valid.query });
         },
       ),
     );
@@ -193,7 +194,7 @@ describe("validate (composition)", () => {
 
     const app = serve(
       new RhythmRouter().post("/shout", validate("body", uppercase), (ctx) => {
-        ctx.text(ctx.valid.body);
+        text(ctx, ctx.valid.body);
       }),
     );
 

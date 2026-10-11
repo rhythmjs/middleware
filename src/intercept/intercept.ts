@@ -1,6 +1,7 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import type { Middleware } from "@rhythmjs/rhythm/types";
 import type { RhythmHttpContext } from "@rhythmjs/router/context";
+import { json } from "@rhythmjs/router/response";
 
 export interface InterceptIssue {
   message: string;
@@ -42,7 +43,7 @@ export function intercept(schema: StandardSchemaV1): Middleware<RhythmHttpContex
     const result = await schema["~standard"].validate(value);
     if (result.issues) {
       const failure: InterceptFailure = { success: false, issues: serializeIssues(result.issues) };
-      ctx.json(failure, 500);
+      json(ctx, failure, 500);
       return;
     }
 
@@ -50,6 +51,6 @@ export function intercept(schema: StandardSchemaV1): Middleware<RhythmHttpContex
       response.body = result.value;
       return;
     }
-    ctx.json(result.value);
+    json(ctx, result.value);
   };
 }

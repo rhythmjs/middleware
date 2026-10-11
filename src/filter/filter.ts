@@ -1,5 +1,6 @@
 import type { Middleware } from "@rhythmjs/rhythm/types";
 import type { RhythmHttpContext } from "@rhythmjs/router/context";
+import { json } from "@rhythmjs/router/response";
 
 export interface FilterFailure {
   success: false;
@@ -40,7 +41,7 @@ export function filter(
               ...(error.details === undefined ? {} : { details: error.details }),
             }
           : { success: false, status: 500, message: "Internal Server Error" };
-      ctx.json(failure, failure.status);
+      json(ctx, failure, failure.status);
     }
   };
 }

@@ -1,6 +1,7 @@
 import type { StandardSchemaV1 } from "@standard-schema/spec";
 import type { ExtensionMiddleware, Middleware } from "@rhythmjs/rhythm/types";
 import type { RhythmHttpContext } from "@rhythmjs/router/context";
+import { json } from "@rhythmjs/router/response";
 
 export type ValidationTarget = "body" | "query" | "param";
 
@@ -71,7 +72,7 @@ export function validate<TTarget extends ValidationTarget, TSchema extends Stand
   const middleware: Middleware<ValidationContext> = async (ctx, next) => {
     const fail = (issues: readonly ValidationIssue[]): void => {
       const failure: ValidationFailure = { success: false, target, issues };
-      ctx.json(failure, 400);
+      json(ctx, failure, 400);
     };
 
     const extracted = await extract(ctx, target);
